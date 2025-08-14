@@ -1,0 +1,76 @@
+# AE–OC Health Score Calculation Algorithm
+# This builds a full algorithmic structure for score calculation based on input values.
+
+def ae_oc_health_score(
+    fed_rate, core_inflation, pe_ratio,
+    private_investment_ratio, debt_to_gdp,
+    moral_hazard_score, gini_index,
+    trust_score, inflation_volatility
+):
+    # 1. Epistemological Clarity (30%)
+    # Interest Rate Gap Score
+    ideal_gap = 1.5
+    actual_gap = fed_rate - core_inflation
+    score_gap = max(0, 100 - 20 * abs(actual_gap - ideal_gap))
+
+    # P/E Ratio Score
+    ideal_pe = 15
+    score_pe = max(0, 100 - 5 * abs(pe_ratio - ideal_pe))
+
+    epistemic_score = (score_gap + score_pe) / 2
+
+    # 2. Causal-Systemic Integrity (25%)
+    # Private Investment / GDP Score
+    ideal_investment_ratio = 0.20
+    score_investment = min(100, (private_investment_ratio / ideal_investment_ratio) * 100)
+
+    # Debt-to-GDP Score
+    ideal_debt = 90
+    score_debt = max(0, 100 - 0.5 * abs(debt_to_gdp - ideal_debt))
+
+    systemic_score = (score_investment + score_debt) / 2
+
+    # 3. Ethical Consistency (20%)
+    # Moral Hazard Index (0 = perfect, 100 = total corruption)
+    score_moral_hazard = 100 - moral_hazard_score
+
+    # Gini Index Score
+    ideal_gini = 0.35
+    score_gini = max(0, 100 - 400 * abs(gini_index - ideal_gini))
+
+    ethical_score = (score_moral_hazard + score_gini) / 2
+
+    # 4. Institutional Trust (25%)
+    score_trust = trust_score  # 0–100 scale directly from surveys
+    ideal_volatility = 1.0
+    score_volatility = max(0, 100 - 25 * (inflation_volatility - ideal_volatility) ** 2)
+
+    trust_score_total = (score_trust + score_volatility) / 2
+
+    # Final AE–OC Health Score (Weighted Average)
+    total_score = (
+        0.30 * epistemic_score +
+        0.25 * systemic_score +
+        0.20 * ethical_score +
+        0.25 * trust_score_total
+    )
+
+    return {
+        "Epistemological Clarity": epistemic_score,
+        "Systemic Integrity": systemic_score,
+        "Ethical Consistency": ethical_score,
+        "Institutional Trust": trust_score_total,
+        "AE–OC Health Score": total_score
+    }
+
+ae_oc_health_score(
+    fed_rate=4.33,
+    core_inflation=1,
+    pe_ratio=24.20,
+    private_investment_ratio=0.18,
+    debt_to_gdp=130,
+    moral_hazard_score=50,
+    gini_index=0.39,
+    trust_score=55,
+    inflation_volatility=1.0
+)
