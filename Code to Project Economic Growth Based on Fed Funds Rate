@@ -1,0 +1,47 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define time period
+years = np.arange(2025, 2028.1, 0.1)
+
+# Simulated models: Baseline economic impact of 3 Fed policy paths
+# GDP growth (%, annualized), Inflation (%), S&P 500 Index (arbitrary baseline 100), AE–OC "Health Score" (scale 0–100)
+
+def simulate_policy(rate_policy):
+    if rate_policy == "cut":
+        gdp = 2 + 0.5*np.sin(0.8*years)  # short-term GDP boost
+        inflation = 3 + 0.5*np.sin(1.2*years + 1) + 0.4*(years - 2025)  # inflation rises over time
+        sp500 = 100 + 10*(years - 2025)**1.5  # speculative growth
+        health = 80 - 15*(years - 2025)**0.9  # AE–OC score deteriorates
+    elif rate_policy == "hold":
+        gdp = 1.8 + 0.3*np.sin(0.7*years)
+        inflation = 2.2 + 0.2*np.sin(1.1*years + 1)
+        sp500 = 100 + 5*(years - 2025)**1.2
+        health = 80 + 2*(years - 2025)
+    elif rate_policy == "raise":
+        gdp = 1.5 + 0.2*np.sin(0.9*years) - 0.1*(years - 2025)
+        inflation = 1.8 + 0.1*np.sin(1.3*years + 2) - 0.1*(years - 2025)
+        sp500 = 100 + 3*(years - 2025)**1.1
+        health = 80 + 5*(years - 2025)**0.9
+    return gdp, inflation, sp500, health
+
+policies = ["cut", "hold", "raise"]
+results = {policy: simulate_policy(policy) for policy in policies}
+
+# Plot results
+fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+titles = ["GDP Growth (%)", "Inflation (%)", "S&P 500 Index", "AE–OC Health Score"]
+ylims = [(1, 4), (1, 5), (100, 200), (60, 100)]
+
+for i, metric in enumerate(["GDP", "Inflation", "S&P 500", "AE–OC Health"]):
+    ax = axs[i//2, i%2]
+    for policy in policies:
+        ax.plot(years, results[policy][i], label=policy.capitalize())
+    ax.set_title(titles[i])
+    ax.set_ylim(ylims[i])
+    ax.set_xlabel("Year")
+    ax.set_ylabel(titles[i])
+    ax.legend()
+
+plt.tight_layout()
+plt.show()
