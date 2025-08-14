@@ -1,0 +1,75 @@
+#This code was made by me after I discovered the Bresenham's Line Algorithm for approximating pixel coordinates of the arctangent function.
+#I thought it was really interesting, so I tried to see how it worked visually.
+import math
+import matplotlib.pyplot as plt
+
+def arctan_scaled(x, y_scale=201.6):
+    """Scale arctan(x) to pixel space."""
+    return int(round(math.atan(x) * y_scale))
+
+def bresenham_line(x0, y0, x1, y1):
+    """Standard Bresenham's line algorithm."""
+    points = []
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx - dy
+
+    while True:
+        points.append((x0, y0))
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = 2 * err
+        if e2 > -dy:
+            err -= dy
+            x0 += sx
+        if e2 < dx:
+            err += dx
+            y0 += sy
+    return points
+
+def generate_arctan_curve(x_max=112, y_scale=201.6):
+    """Generate pixel coordinates for the arctan curve."""
+    curve_points = []
+    prev_x = 0
+    prev_y = arctan_scaled(prev_x, y_scale)
+
+    for x in range(1, x_max + 1):
+        y = arctan_scaled(x, y_scale)
+        # Apply Bresenham between each consecutive point
+        segment = bresenham_line(prev_x, prev_y, x, y)
+        curve_points.extend(segment)
+        prev_x = x
+        prev_y = y
+
+    return curve_points
+
+def plot_pixels(points, canvas_size=(350, 350)):
+    """Plot pixels on a canvas."""
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.set_xlim(0, canvas_size[0])
+    ax.set_ylim(0, canvas_size[1])
+
+    # Invert Y-axis to mimic screen coordinate system
+    ax.invert_yaxis()
+
+    # Extract X and Y coordinates
+    x_vals = [p[0] for p in points]
+    y_vals = [p[1] for p in points]
+
+    # Plot as scatter points for a pixelated look
+    ax.scatter(x_vals, y_vals, c='black', marker='s', s=10)
+
+    ax.set_title("arctan(x) Curve (Bresenham Approximation)")
+    ax.set_xlabel("x (pixels)")
+    ax.set_ylabel("y (pixels)")
+
+    # Enable zoom and pan from toolbar
+    plt.tight_layout()
+    plt.show()
+
+# --------- Main Execution ---------
+if __name__ == "__main__":
+    points = generate_arctan_curve()
+    plot_pixels(points)
