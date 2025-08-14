@@ -1,0 +1,27 @@
+import pandas as pd
+import numpy as np
+
+data = [
+    {"zip": "77433", "neighborhood": "Bridgeland", "home_price": 447995, "monthly_rent": 3291},
+    {"zip": "77354", "neighborhood": "Magnolia", "home_price": 331000, "monthly_rent": 1674},
+    {"zip": "77429", "neighborhood": "Cypress", "home_price": 390000, "monthly_rent": 1382},
+    {"zip": "77377", "neighborhood": "Tomball", "home_price": 355000, "monthly_rent": 1380},
+    {"zip": "77493", "neighborhood": "North Katy", "home_price": 334999, "monthly_rent": 2450},
+    {"zip": "77447", "neighborhood": "Hockley", "home_price": 328125, "monthly_rent": 2093},
+]
+
+df = pd.DataFrame(data)
+
+def calculate_buy_score(row, ae_oc_score=71.635, moral_hazard=50):
+    rent_yield = (row['monthly_rent'] * 12) / row['home_price'] * 100
+    score = (
+        0.4 * ae_oc_score +
+        0.3 * rent_yield +
+        0.3 * (100 - moral_hazard)
+    )
+    return round(score, 2)
+
+df['buy_score'] = df.apply(calculate_buy_score, axis=1)
+
+df_sorted = df.sort_values(by='buy_score', ascending=False)
+print(df_sorted[['neighborhood', 'zip', 'home_price', 'monthly_rent', 'buy_score']])
