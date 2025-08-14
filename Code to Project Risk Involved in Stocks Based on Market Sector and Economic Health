@@ -1,0 +1,66 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Sector Score Calculator
+# B [Weight - 30%] = Bailout History (ratio of bailouts in 20th & 21st centuries * 100)
+# P [Weight - 25%] = Policy Dependency (estimated reliance on interest rates, subsidies, federal protection [Monetary Policy])
+# E [Weight - 25%] = Public Expectation (Is it 'Too big to fail'?)
+# A [Weight - 20%] = Moral Accountability (Can it fail without contagion, fear, or government rescue?)
+sector_data = [
+    {"sector": "Banking", "B": 95, "P": 90, "E": 90, "A": 30},
+    {"sector": "Housing", "B": 85, "P": 85, "E": 80, "A": 40},
+    {"sector": "Higher Education", "B": 70, "P": 75, "E": 80, "A": 30},
+    {"sector": "Energy", "B": 40, "P": 60, "E": 50, "A": 60},
+    {"sector": "Technology", "B": 30, "P": 40, "E": 50, "A": 70},
+    {"sector": "Defense", "B": 90, "P": 95, "E": 85, "A": 20},
+    {"sector": "Crypto", "B": 10, "P": 10, "E": 15, "A": 90},
+]
+
+moral_df = pd.DataFrame(sector_data)
+moral_df['MHS'] = (
+    0.3 * moral_df['B'] +
+    0.25 * moral_df['P'] +
+    0.25 * moral_df['E'] +
+    0.2 * (100 - moral_df['A'])
+)
+
+# Dashboard
+
+plt.figure(figsize=(10,6))
+plt.bar(moral_df['sector'], moral_df['MHS'], color='firebrick')
+plt.title("AE-OC Moral Hazard Score by Sector (2025 Estimate)")
+plt.ylabel("Moral Hazard Score (0-100)")
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+plt.show()
+
+# Portfolio Screener
+# Example: ETF/Stock - Exposure to Sectors
+portfolio = [
+    {"ticker": "XLF", "name": "Financial Select SPDR", "exposure": {"Banking": 0.9, "Technology": 0.1}},
+    {"ticker": "XLRE", "name": "Real Estate Select SPDR", "exposure": {"Housing": 0.8, "Banking": 0.2}},
+    {"ticker": "ARKK", "name": "ARK Innovation ETF", "exposure": {"Technology": 0.7, "Crypto": 0.3}},
+    {"ticker": "XLE", "name": "Energy Select SPDR", "exposure": {"Energy": 1.0}},
+    {"ticker": "ITA", "name": "Aerospace & Defense ETF", "exposure": {"Defense": 1.0}},
+]
+
+# Calculate Weighted MHS per ETF
+
+portfolio_scores = []
+for fund in portfolio:
+    score = 0
+    for sector, weight in fund['exposure'].items():
+        sector_score = moral_df.loc[moral_df['sector'] == sector, 'MHS'].values[0]
+        score += sector_score * weight
+    portfolio_scores.append({"ticker": fund['ticker'], "name": fund['name'], "moral_hazard_score": round(score, 2)})
+
+screener_df = pd.DataFrame(portfolio_scores).sort_values(by='moral_hazard_score', ascending=False)
+print(screener_df)
+
+# Highlight Safest vs. Riskiest
+safest = screener_df.loc[screener_df['moral_hazard_score'] < 50]
+riskiest = screener_df.loc[screener_df['moral_hazard_score'] > 70]
+print("\nSafest Funds:")
+print(safest)
+print("\nRiskiest Funds:")
+print(riskiest)
